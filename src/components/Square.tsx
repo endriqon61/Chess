@@ -53,10 +53,22 @@ const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition
 
                         // newPieces.forEach(p => p.calculateLegalMoves(newPieces))
                         const check = Chess.WhoInCheck(newPieces) 
-                        console.log("Current Chekc", check)
+                        // console.log("Current Chekc", check)
                         gameState.currentPiece.calculateLegalMoves(newPieces)
                         if(check.length) {
-                            alert( `Check ${check.includes(Color.White) ? "White" : "Black"}`)
+                            if(!check.includes(gameState.isPlaying)) {
+                                newPieces.forEach(p => p.calculateLegalMoves(newPieces))
+                                newPieces.forEach(p => p.filterCheckMoves(newPieces))
+                                let isMate = true
+                                for(const piece of newPieces.filter(p => p.getColor() != gameState.isPlaying) )  {
+                                    if(piece.getLegalMoves().length) {
+                                        console.log(`is Matey ${piece.getTypePiece()} (${piece.getPosition().row}, ${piece.getPosition().col}): ` + piece.getLegalMoves().join("/"))
+                                        isMate = false
+                                    }
+                                }
+
+                                if(isMate) alert("Checkmate")
+                            }
                         }
                         setGameState({
                             ...gameState,

@@ -10,7 +10,7 @@ interface gameState {
     currentPiece: Piece | null
 }
 
-const startingFEN = '8/8/8/4K3/8/3k4/8/2R5 w KQkq - 0 1';
+const startingFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 const startingPieces = Chess.parseFEN(startingFEN)
 
 const initialGameState = {

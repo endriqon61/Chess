@@ -27,11 +27,7 @@ export class Chess {
                     // alert("Checked White")
                     arr.push(Color.White)
                 }
-            }
-        }
-        
-        for(let piece of board) {
-            for(let pieceInVision of piece.getVision()) {
+
                 if(piece.getColor() == Color.White && JSON.stringify(blackKing?.getPosition()) == JSON.stringify(pieceInVision)) {
                     // alert("Checked Black")
                     arr.push(Color.Black)

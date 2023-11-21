@@ -48,7 +48,10 @@ export class Piece {
         } else if (this.typePiece.toLocaleLowerCase() == "r") {
             legalMoves = this.addMovesToDirections(board, STRAIGHT_DIRECTIONS)
         } else if (this.typePiece.toLocaleLowerCase() == "k") {
-            legalMoves = STRAIGHT_DIRECTIONS.concat(DIAGONAL_DIRECTIONS)
+            legalMoves = STRAIGHT_DIRECTIONS.concat(DIAGONAL_DIRECTIONS).filter(m => {
+                const nextPosition = [this.position.row + m[0], this.position.col + m[1]]
+                return !(nextPosition[0] > 8 || nextPosition[1] < 1 || nextPosition[0] < 1 || nextPosition[1] > 8)
+            })
         } else {
             throw new Error("Invalid piece")
         }
@@ -103,8 +106,9 @@ export class Piece {
                 moveToAdd = [...newMovesToAdd]
                 const nextPosition = [this.position.row + moveToAdd[0], this.position.col + moveToAdd[1]]
                 const adjPiece = Chess.getPieceByPosition(nextPosition, board)  
-                if(adjPiece || (nextPosition[0] > 8 || nextPosition[1] < 0 || nextPosition[0] < 0 || nextPosition[1] > 8)) isValidSquare = false
-                legalMoves.push(newMovesToAdd)
+                if(adjPiece || (nextPosition[0] > 8 || nextPosition[1] < 1 || nextPosition[0] < 1 || nextPosition[1] > 8)) isValidSquare = false
+                if(isValidSquare || (adjPiece && adjPiece?.getColor() != this.color))
+                    legalMoves.push(newMovesToAdd)
             }
         }
         return legalMoves
