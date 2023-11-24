@@ -14,6 +14,12 @@ const KNIGHT_MOVES: number[][] = [
 const STRAIGHT_DIRECTIONS = [[1, 0], [0, 1], [-1, 0], [0, -1]]
 const DIAGONAL_DIRECTIONS = [[1, 1], [-1, 1], [1, -1], [-1, -1]]
 
+interface SlidingVector  {
+    piecePosition: number[],
+    kingPosition: number[]
+    betweenPieces: Piece[]
+}
+
 
 export class Piece {
 
@@ -48,22 +54,27 @@ export class Piece {
         } else if (this.typePiece.toLocaleLowerCase() == "r") {
             legalMoves = this.addMovesToDirections(board, STRAIGHT_DIRECTIONS)
         } else if (this.typePiece.toLocaleLowerCase() == "k") {
-            legalMoves = STRAIGHT_DIRECTIONS.concat(DIAGONAL_DIRECTIONS).filter(m => {
-                const nextPosition = [this.position.row + m[0], this.position.col + m[1]]
-                return !(nextPosition[0] > 8 || nextPosition[1] < 1 || nextPosition[0] < 1 || nextPosition[1] > 8)
-            })
+            legalMoves = STRAIGHT_DIRECTIONS.concat(DIAGONAL_DIRECTIONS)
         } else {
             throw new Error("Invalid piece")
         }
-
         // this.calculateVision(board)
-        const newLegalMoves = legalMoves.filter(move => Chess.getPieceByPosition([this.position.row + move[0], this.position.col + move[1]], board)?.getColor() != this.color).map(move => [this.position.row + move[0], this.position.col + move[1]])
-        this.legalMoves = newLegalMoves  
+
+        this.legalMoves = legalMoves.filter(move => Chess.getPieceByPosition([this.position.row + move[0], this.position.col + move[1]], board)?.getColor() != this.color).map(move => [this.position.row + move[0], this.position.col + move[1]])
+        .filter(m => {
+
+                return !(m[0] > 8 || m[1] < 1 || m[0] < 1 || m[1] > 8)
+        })
+
+        // this.calculateVision(newLegalMoves, board)
+       
+    }
+
+    private calculateVision(legalMoves: number[][], board: Piece[]) {
 
         this.vision = []
-        for(let move of newLegalMoves) {
 
-            // const visiblePiece = Chess.getPieceByPosition([this.position.row + move[0], this.position.col + move[1]], board)
+        for(let move of legalMoves) {
 
             const visiblePiece = Chess.getPieceByPosition([move[0], move[1]], board)
 
@@ -72,24 +83,110 @@ export class Piece {
                     this.vision.push(visiblePiece.getPosition())
             }
         }
-       
+    }
+
+    private isInVector(pos1: number[], pos2: number[]) {
+        const piecePos = [this.position.row, this.position.col]
+        const smallerX = pos1[0] > pos2[0] ? pos2[0] : pos1[0]
+        const smallerY = pos1[1] > pos2[1] ? pos2[1] : pos1[1]
+        const biggerX = pos1[0] < pos2[0] ? pos2[0] : pos1[0]
+        const biggerY = pos1[1] < pos2[1] ? pos2[1] : pos1[1]
+
+        return  piecePos[0] - piecePos[1] == pos1[0] - pos1[1]
+        && ((piecePos[0] > smallerX && piecePos[0] < biggerX) && (piecePos[1] > smallerY && piecePos[1] < biggerY))
+    }
+
+    public isSlidingPiece(typePiece: string) {
+        return typePiece && (typePiece.toLowerCase() == "b" || typePiece.toLowerCase() == "q" || typePiece.toLowerCase() == "r")
     }
 
     public filterCheckMoves(board: Piece[]) {
 
+        let isPlaying = Color.Black
+
+        const slidingVectors: SlidingVector[] = []
+        // if(Math.random() * 2  == 1) isPlaying = Color.Black;
+
+        for(const p of board) p.calculateLegalMoves(board)
+
+        const check = Chess.WhoInCheck(board) 
+
+        const king = board.find(p => p.typePiece.toLocaleLowerCase() == "k" && p.getColor() == isPlaying)
+
+        const kingPosition = Object.values(king!.getPosition())
+
+        //move is an array [row(1-8), col(1-8)]
+        const squaresUnderAttack: number[][] = []
+        const vectors: number[][] = [] 
+        for(const p of board.filter(p => p.getColor() != isPlaying)) {
+             p.getLegalMoves().map(m => squaresUnderAttack.push(m))
+             if(p.getTypePiece().toLocaleLowerCase() == "b") {
+                const piecePosition = [p.position.row, p.position.col] 
+                if(p.getTypePiece().toLocaleLowerCase() == "b") {
+                   if(piecePosition[0] - piecePosition[1] == kingPosition[0] - kingPosition[1])  {
+                    slidingVectors.push({piecePosition: piecePosition, kingPosition: kingPosition, betweenPieces: []})
+                   }
+                }
+             }
+        }
+
+        for(const vector of slidingVectors) {
+            vector.betweenPieces = board.filter(p => {
+                return p.isInVector(vector.kingPosition, vector.piecePosition)
+            })
+        }
+
+
+        console.log("vectors", slidingVectors)
+
         this.legalMoves = [...this.legalMoves.filter(move => {
+            //block king moves that are currently attacked by opposite colors
+            
+            //find opposite color sliding piece vectors
+            if(this.typePiece.toLocaleLowerCase() == "k") {
+                return !squaresUnderAttack.some(s => s.join() == [move[0], move[1]].join())
+            }
 
-            const position = {row: move[0], col: move[1]}
-            const newPieces = this.moveTo(position, board)
-            newPieces.forEach(p => p.calculateLegalMoves(newPieces))
+            const vector = slidingVectors.find(v => v.betweenPieces.some(p => [p.getPosition().row, p.getPosition().col].join() == [this.position.row, this.position.col].join()))
+            //check if piece is pinned it cannot move outside the sliding piece and king vector
+            if(vector) return false
 
-            const check = Chess.WhoInCheck(newPieces) 
 
-            console.log("Check: ", check)
+            if(check.includes(isPlaying)) {
 
-            return !check.includes(this.color)
+                //if sliding piece is checking only legal moves are king moves or blocking the check
 
+
+                //if pawn or knight is checking only legal moves are king moves or capturing the piece
+
+
+                //double check logic goes here
+            } 
+
+
+            return true
         })]
+        //TODO Pins
+        //TODO King Moves
+
+        //TODO Captures
+
+        // this.legalMoves = [...this.legalMoves.filter(move => {
+
+        //     const position = {row: move[0], col: move[1]}
+
+        //     const newPieces = this.moveTo(position, board)
+
+        //     // newPieces.forEach(p => p.calculateLegalMoves(newPieces))
+
+        //     console.time("Check")
+        //     const check = Chess.WhoInCheck(newPieces) 
+        //     console.timeEnd("Check")
+
+
+        //     return !check.includes(this.color)
+
+        // })]
     }
     
     private addMovesToDirections(board: Piece[], directions: number[][]): number[][] {
@@ -144,6 +241,7 @@ export class Piece {
 
     moveTo(ToSquare: Position, board: Piece[]) {
 
+        console.time("MoveTo")
         const newPieces = board.map(i => this.createReference(i))
 
         newPieces.forEach((item: Piece, index: number) => {
@@ -159,6 +257,7 @@ export class Piece {
         })
 
 
+        console.timeEnd("MoveTo")
         return newPieces
     }
 

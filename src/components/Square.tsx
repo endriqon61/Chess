@@ -9,12 +9,34 @@ const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition
     const { gameState, setGameState } = useGameState()
 
     const [ isLegal, setIsLegal] = useState(false)
+    const [check ,setCheck] = useState<Color[]>([])
 
     function createReference(obj: Piece) {
     const reference = new Piece({row: 0, col: 0}, Color.Black, "p");
     Object.assign(reference, obj);
     return reference;
     }
+
+    useEffect(() => {
+            if(check.length) {
+                if(check.includes(gameState.isPlaying)) {
+                    // alert("Check" + check[0])
+                    gameState.board.forEach(p => p.calculateLegalMoves(gameState.board))
+                    for(let piece of gameState.board) piece.filterCheckMoves(gameState.board)
+                    // newPieces.forEach(p => p.filterCheckMoves(newPieces))
+                    let isMate = true
+                    for(const piece of gameState.board.filter(p => p.getColor() == gameState.isPlaying) )  {
+                            // console.log(`is Matey ${piece.getTypePiece()} (${piece.getPosition().row}, ${piece.getPosition().col}): ` + piece.getLegalMoves().join("/"))
+                        if(piece.getLegalMoves().length) {
+                            // console.log(`is Matey ${piece.getTypePiece()} (${piece.getPosition().row}, ${piece.getPosition().col}): ` + piece.getLegalMoves().join("/"))
+                            isMate = false
+                        }
+                    }
+
+                    // if(isMate) alert("Checkmate")
+                }
+            }
+    }, [gameState.board])
 
     useEffect(() => {
         setIsLegal(false)
@@ -51,31 +73,18 @@ const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition
 
                         const newPieces = gameState.currentPiece.moveTo(squarePosition, gameState.board)
 
-                        // newPieces.forEach(p => p.calculateLegalMoves(newPieces))
+                        newPieces.forEach(p => p.calculateLegalMoves(newPieces))
                         const check = Chess.WhoInCheck(newPieces) 
                         // console.log("Current Chekc", check)
+                        setCheck(check)
                         gameState.currentPiece.calculateLegalMoves(newPieces)
-                        if(check.length) {
-                            if(!check.includes(gameState.isPlaying)) {
-                                newPieces.forEach(p => p.calculateLegalMoves(newPieces))
-                                newPieces.forEach(p => p.filterCheckMoves(newPieces))
-                                let isMate = true
-                                for(const piece of newPieces.filter(p => p.getColor() != gameState.isPlaying) )  {
-                                    if(piece.getLegalMoves().length) {
-                                        console.log(`is Matey ${piece.getTypePiece()} (${piece.getPosition().row}, ${piece.getPosition().col}): ` + piece.getLegalMoves().join("/"))
-                                        isMate = false
-                                    }
-                                }
-
-                                if(isMate) alert("Checkmate")
-                            }
-                        }
                         setGameState({
                             ...gameState,
                             currentPiece: null,
                             board: newPieces.map(i => createReference(i)),
                             isPlaying: gameState.isPlaying == Color.White ? Color.Black : Color.White
                         })
+
 
                     } else {
 

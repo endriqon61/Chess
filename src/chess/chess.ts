@@ -20,20 +20,31 @@ export class Chess {
 
         const arr: Color[] = []
 
-        board.forEach(p => p.calculateLegalMoves(board))
-        for(let piece of board) {
-            for(let pieceInVision of piece.getVision()) {
-                if(piece.getColor() == Color.Black && JSON.stringify(whiteKing?.getPosition()) == JSON.stringify(pieceInVision)) {
-                    // alert("Checked White")
-                    arr.push(Color.White)
-                }
+        // board.forEach(p => p.calculateLegalMoves(board))
+        // for(let p of board) {
+        //     p.calculateLegalMoves(board)
+        // }
+        if(whiteKing && blackKing) 
+            for(let piece of board) {
 
-                if(piece.getColor() == Color.White && JSON.stringify(blackKing?.getPosition()) == JSON.stringify(pieceInVision)) {
-                    // alert("Checked Black")
+                // piece.calculateLegalMoves(board)
+                if(piece.getLegalMoves().find(m => m.join() == [whiteKing!.getPosition().row, whiteKing!.getPosition().col].join()) && piece.getColor() != whiteKing?.getColor())
+                    arr.push(Color.White)
+
+                if(piece.getLegalMoves().find(m => m.join() == [blackKing!.getPosition().row, blackKing!.getPosition().col].join()) && piece.getColor() != blackKing?.getColor())
                     arr.push(Color.Black)
-                }
+                // for(let pieceInVision of piece.getVision()) {
+                //     if(piece.getColor() == Color.Black && JSON.stringify(whiteKing?.getPosition()) == JSON.stringify(pieceInVision)) {
+                //         // alert("Checked White")
+                //         arr.push(Color.White)
+                //     }
+
+                //     if(piece.getColor() == Color.White && JSON.stringify(blackKing?.getPosition()) == JSON.stringify(pieceInVision)) {
+                //         // alert("Checked Black")
+                //         arr.push(Color.Black)
+                //     }
+                // }
             }
-        }
 
 
         return arr
