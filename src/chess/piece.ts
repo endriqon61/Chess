@@ -87,7 +87,10 @@ export class Piece {
 
             console.log("Check: ", check)
 
-            return !check.includes(this.color)
+            if(this.color == Color.White)
+                return !check?.whiteCheckedByPieces.length
+            else
+                return !check?.blackCheckedByPieces.length
 
         })]
     }

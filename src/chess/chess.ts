@@ -3,6 +3,11 @@ import Color from "../enums/player";
 
 const globalPieces = ["r", "n", "b", "q", "k", "p"]
 
+export interface Check {
+    blackCheckedByPieces: Piece[] 
+    whiteCheckedByPieces: Piece[] 
+}
+
 export class Chess {
 
 // 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -10,33 +15,65 @@ export class Chess {
     public static getPieceByPosition(position: number[], board: Piece[]) {
        return board.find(p => [p.getPosition().row, p.getPosition().col].join() == position.join())
     }
+
+    private static CanBlockCheck(board: Piece[], isPlaying: Color, check: Check, accessProp: "blackCheckedByPieces" | "whiteCheckedByPieces") {
+
+
+        if(check[accessProp].length > 1)
+            return false;
+
+        const pieceChecking = check[accessProp][0]
+
+
+    }
+
+    public static isMate(board: Piece[], isPlaying: Color, check: Check): boolean {
+
+        const king = board.find(p => p.getTypePiece().toLocaleLowerCase() == "k" && p.getColor() != isPlaying)
+        king?.calculateLegalMoves(board)
+        king?.filterCheckMoves(board)
+
+        const kingHasLegalMoves = king?.getLegalMoves()?.length! > 0
+
+        const accessProp = isPlaying == Color.White ? "blackCheckedByPieces" : "whiteCheckedByPieces";
+
+        let canBlockCheck = true
+
+        let canCapturePieces = true
+        
+        
+
+
+
+
+        return !canCapturePieces && !canBlockCheck && !kingHasLegalMoves;
+    }
     
-    
-    public static WhoInCheck(board: Piece[]): Color[] {
+    public static WhoInCheck(board: Piece[]): Check | null {
 
         const whiteKing = board.find(piece => piece.getTypePiece().toLocaleLowerCase() === "k" && piece.getColor() == Color.White)
-
         const blackKing = board.find(piece => piece.getTypePiece().toLocaleLowerCase() === "k" && piece.getColor() == Color.Black)
 
-        const arr: Color[] = []
+        let check: Check = {
+            whiteCheckedByPieces: [],
+            blackCheckedByPieces: []
+        };
 
         board.forEach(p => p.calculateLegalMoves(board))
         for(let piece of board) {
-            for(let pieceInVision of piece.getVision()) {
-                if(piece.getColor() == Color.Black && JSON.stringify(whiteKing?.getPosition()) == JSON.stringify(pieceInVision)) {
-                    // alert("Checked White")
-                    arr.push(Color.White)
-                }
 
-                if(piece.getColor() == Color.White && JSON.stringify(blackKing?.getPosition()) == JSON.stringify(pieceInVision)) {
-                    // alert("Checked Black")
-                    arr.push(Color.Black)
-                }
+            if(piece.getVision().find(v => JSON.stringify(v) ==  JSON.stringify(whiteKing?.getPosition()))) {
+                check.whiteCheckedByPieces.push(piece)
             }
+
+            if(piece.getVision().find(v => JSON.stringify(v) ==  JSON.stringify(blackKing?.getPosition()))) {
+                check.blackCheckedByPieces.push(piece)
+            }
+
         }
 
 
-        return arr
+        return check
     }
 
     public static parseFEN(fen: string): Piece[] {
