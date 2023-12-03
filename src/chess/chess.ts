@@ -16,14 +16,40 @@ export class Chess {
        return board.find(p => [p.getPosition().row, p.getPosition().col].join() == position.join())
     }
 
-    private static CanBlockCheck(board: Piece[], isPlaying: Color, check: Check, accessProp: "blackCheckedByPieces" | "whiteCheckedByPieces") {
+    private static moveIsInVector(kingPosition: Position, checkPiece: Piece, move: number[]) {
 
+        const checkPiecePosition = checkPiece.getPosition()
+        const isInDiagonal = move[0] - move[1] == checkPiecePosition.row - checkPiecePosition.col
+        const isInVerticalLine = move[1] == checkPiecePosition.col;
+        const isInHorizontalLine = move[0] == checkPiecePosition.row;
+
+
+
+
+    }
+
+
+    private static CanBlockCheck(board: Piece[], isPlaying: Color, check: Check, accessProp: "blackCheckedByPieces" | "whiteCheckedByPieces") {
 
         if(check[accessProp].length > 1)
             return false;
 
+
+        // const check = Chess.WhoInCheck(board) 
+
+        const king = board.find(p => p.getTypePiece().toLocaleLowerCase() == "k" && p.getColor() != isPlaying)
+        const kingPosition = Object.values(king!.getPosition())
         const pieceChecking = check[accessProp][0]
 
+        
+        let isBlockable = false        
+
+        
+
+        
+
+
+       
 
     }
 

@@ -76,7 +76,7 @@ const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition
                         newPieces.forEach(p => p.calculateLegalMoves(newPieces))
                         const check = Chess.WhoInCheck(newPieces) 
                         // console.log("Current Chekc", check)
-                        setCheck(check)
+                        // setCheck(check)
                         gameState.currentPiece.calculateLegalMoves(newPieces)
                         const accessProp = gameState.isPlaying == Color.White ? "blackCheckedByPieces" : "whiteCheckedByPieces";
                         if(check![accessProp]?.length) {
