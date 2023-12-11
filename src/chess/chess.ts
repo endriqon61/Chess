@@ -16,18 +16,27 @@ export class Chess {
        return board.find(p => [p.getPosition().row, p.getPosition().col].join() == position.join())
     }
 
+    private static distance(A: number[], B: number[]) {
+        return Math.abs(A[0] - B[0]) + Math.abs(A[1] - B[1])
+    }
+
     private static moveIsInVector(kingPosition: Position, checkPiece: Piece, move: number[]) {
 
         const checkPiecePosition = checkPiece.getPosition()
-        const isInDiagonal = move[0] - move[1] == checkPiecePosition.row - checkPiecePosition.col
-        const isInVerticalLine = move[1] == checkPiecePosition.col;
-        const isInHorizontalLine = move[0] == checkPiecePosition.row;
 
+        // const isInDiagonal = move[0] - move[1] == checkPiecePosition.row - checkPiecePosition.col && move[0] - move[1] == kingPosition.row - kingPosition.col
 
+        // const isInVerticalLine = move[1] == checkPiecePosition.col && move[1] == kingPosition.col;
 
+        // const isInHorizontalLine = move[0] == checkPiecePosition.row  && move[1] == kingPosition.col;
+
+        return this.distance([kingPosition.row, kingPosition.col], [move[0], move[1]])  + this.distance([move[0], move[1]], [checkPiecePosition.row, checkPiecePosition.col]) == this.distance([kingPosition.row, kingPosition.col], [checkPiecePosition.row, checkPiecePosition.col])
 
     }
 
+    private static isPiecePinned(piece: Piece, board: Piece[]) {
+
+    }
 
     private static CanBlockCheck(board: Piece[], isPlaying: Color, check: Check, accessProp: "blackCheckedByPieces" | "whiteCheckedByPieces") {
 
@@ -43,36 +52,23 @@ export class Chess {
 
         
         let isBlockable = false        
+        for(let piece of board) {
+           for(let move of piece.getLegalMoves()) {
+                if(this.moveIsInVector(king!.getPosition(), pieceChecking, move))
+                    isBlockable = true
+                // if(kingPosition.join() == move.join()) 
+                //     isBlockable = true
+           } 
+        }
 
-        
-
-        
-
-
-       
-
+        return isBlockable
     }
 
     public static isMate(board: Piece[], isPlaying: Color, check: Check): boolean {
-
-        const king = board.find(p => p.getTypePiece().toLocaleLowerCase() == "k" && p.getColor() != isPlaying)
-        king?.calculateLegalMoves(board)
-        king?.filterCheckMoves(board)
-
-        const kingHasLegalMoves = king?.getLegalMoves()?.length! > 0
-
-        const accessProp = isPlaying == Color.White ? "blackCheckedByPieces" : "whiteCheckedByPieces";
-
-        let canBlockCheck = true
-
-        let canCapturePieces = true
-        
-        
-
-
-
-
-        return !canCapturePieces && !canBlockCheck && !kingHasLegalMoves;
+        return !board.filter(p => p.getColor() != isPlaying).some(p => {
+            p.filterCheckMoves(board)
+            return p.getLegalMoves().length > 0
+        })
     }
     
     public static WhoInCheck(board: Piece[]): Check | null {
@@ -88,11 +84,11 @@ export class Chess {
         board.forEach(p => p.calculateLegalMoves(board))
         for(let piece of board) {
 
-            if(piece.getVision().find(v => JSON.stringify(v) ==  JSON.stringify(whiteKing?.getPosition()))) {
+            if(piece.getLegalMoves().find(v => v.join() ==  [whiteKing?.getPosition().row, whiteKing?.getPosition().col].join())) {
                 check.whiteCheckedByPieces.push(piece)
             }
 
-            if(piece.getVision().find(v => JSON.stringify(v) ==  JSON.stringify(blackKing?.getPosition()))) {
+            if(piece.getLegalMoves().find(v => v.join() ==  [blackKing?.getPosition().row, blackKing?.getPosition().col].join())) {
                 check.blackCheckedByPieces.push(piece)
             }
 

@@ -38,7 +38,6 @@ export class Piece {
         if(this.typePiece.toLocaleLowerCase() == "n") {
             legalMoves = KNIGHT_MOVES
         }
-
         else if(this.typePiece.toLocaleLowerCase() == "p") {
             legalMoves = this.addPawnMoves(board)
         } else if(this.typePiece.toLocaleLowerCase() == "q") {
@@ -55,23 +54,21 @@ export class Piece {
         } else {
             throw new Error("Invalid piece")
         }
-
         // this.calculateVision(board)
         const newLegalMoves = legalMoves.filter(move => Chess.getPieceByPosition([this.position.row + move[0], this.position.col + move[1]], board)?.getColor() != this.color).map(move => [this.position.row + move[0], this.position.col + move[1]])
         this.legalMoves = newLegalMoves  
+        // this.vision = []
+        // for(let move of newLegalMoves) {
 
-        this.vision = []
-        for(let move of newLegalMoves) {
+        //     // const visiblePiece = Chess.getPieceByPosition([this.position.row + move[0], this.position.col + move[1]], board)
 
-            // const visiblePiece = Chess.getPieceByPosition([this.position.row + move[0], this.position.col + move[1]], board)
+        //     const visiblePiece = Chess.getPieceByPosition([move[0], move[1]], board)
 
-            const visiblePiece = Chess.getPieceByPosition([move[0], move[1]], board)
-
-            if(visiblePiece && visiblePiece.getColor() != this.color) {
-                if(visiblePiece)
-                    this.vision.push(visiblePiece.getPosition())
-            }
-        }
+        //     if(visiblePiece && visiblePiece.getColor() != this.color) {
+        //         if(visiblePiece)
+        //             this.vision.push(visiblePiece.getPosition())
+        //     }
+        // }
        
     }
 

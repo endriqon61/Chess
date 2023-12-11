@@ -74,6 +74,7 @@ const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition
                         const newPieces = gameState.currentPiece.moveTo(squarePosition, gameState.board)
 
                         newPieces.forEach(p => p.calculateLegalMoves(newPieces))
+                        // newPieces.forEach(p => p.filterCheckMoves(newPieces))
                         const check = Chess.WhoInCheck(newPieces) 
                         // console.log("Current Chekc", check)
                         // setCheck(check)
@@ -81,7 +82,8 @@ const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition
                         const accessProp = gameState.isPlaying == Color.White ? "blackCheckedByPieces" : "whiteCheckedByPieces";
                         if(check![accessProp]?.length) {
                             if(Chess.isMate(newPieces, gameState.isPlaying, check!)) 
-                                alert(`${gameState.isPlaying == 1 ? "White" : "Black"} wins`)
+                                console.log("someone wins")
+                                // alert(`${gameState.isPlaying == 1 ? "White" : "Black"} wins`)
 
                         }
                         setGameState({
