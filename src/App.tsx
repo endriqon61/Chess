@@ -7,7 +7,9 @@ function App() {
 
   return <>
   <GameProvider>
-  <Board currentPlayerColor={Color.White} /> 
+    <div className="relative">
+      <Board currentPlayerColor={Color.White} /> 
+    </div>
   </GameProvider>
   </>
 }
