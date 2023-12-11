@@ -81,7 +81,7 @@ const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition
                         gameState.currentPiece.calculateLegalMoves(newPieces)
                         const accessProp = gameState.isPlaying == Color.White ? "blackCheckedByPieces" : "whiteCheckedByPieces";
                         if(check![accessProp]?.length) {
-                            if(Chess.isMate(newPieces, gameState.isPlaying, check!)) 
+                            if(Chess.isMate(newPieces, gameState.isPlaying)) 
                                 console.log("someone wins")
                                 // alert(`${gameState.isPlaying == 1 ? "White" : "Black"} wins`)
 

@@ -64,7 +64,7 @@ export class Chess {
         return isBlockable
     }
 
-    public static isMate(board: Piece[], isPlaying: Color, check: Check): boolean {
+    public static isMate(board: Piece[], isPlaying: Color): boolean {
         return !board.filter(p => p.getColor() != isPlaying).some(p => {
             p.filterCheckMoves(board)
             return p.getLegalMoves().length > 0

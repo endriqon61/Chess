@@ -78,7 +78,7 @@ export class Piece {
 
             const position = {row: move[0], col: move[1]}
             const newPieces = this.moveTo(position, board)
-            newPieces.forEach(p => p.calculateLegalMoves(newPieces))
+            // newPieces.forEach(p => p.calculateLegalMoves(newPieces))
 
             const check = Chess.WhoInCheck(newPieces) 
 
@@ -137,9 +137,13 @@ export class Piece {
     }
 
     private createReference(obj: Piece) {
-    const reference = new  Piece({row: 0, col: 0}, Color.White, "p")
-    Object.assign(reference, obj);
-    return reference;
+
+        const reference = new  Piece({row: 0, col: 0}, Color.White, "p")
+
+        Object.assign(reference, obj);
+
+        return reference;
+
     }
 
     moveTo(ToSquare: Position, board: Piece[]) {
