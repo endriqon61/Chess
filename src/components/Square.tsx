@@ -3,27 +3,35 @@ import { Piece, Position } from "../chess/piece"
 import useGameState from "../hooks/useGameState"
 import Color from "../enums/player"
 import { Chess } from "../chess/chess"
+import { socket } from "../socket/socket"
+import useSocket from "../hooks/useSocket"
+
+export function createReference(obj: Piece) {
+const reference = new Piece({row: 0, col: 0}, Color.Black, "p");
+Object.assign(reference, obj);
+return reference;
+}
 
 const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition: Position }) => {
 
     const { gameState, setGameState } = useGameState()
 
+
     const [ isLegal, setIsLegal] = useState(false)
     const [check ,setCheck] = useState<Color[]>([])
 
-    function createReference(obj: Piece) {
-    const reference = new Piece({row: 0, col: 0}, Color.Black, "p");
-    Object.assign(reference, obj);
-    return reference;
-    }
+
 
     const handleSquareClick = () => {
+
+                if(gameState.isPlaying != gameState.playerColor) return
+
                 if (gameState.currentPiece) {
 
+                    
                     if(gameState.currentPiece.getColor() == piece?.getColor()) {
                         piece.calculateLegalMoves(gameState.board)
                         piece.filterCheckMoves(gameState.board)
-                        console.log("")
                         return setGameState({...gameState, currentPiece: piece})
                     }
 
@@ -39,12 +47,15 @@ const Square = ({ piece, squarePosition }: { piece: Piece | null, squarePosition
                             if(Chess.isMate(newPieces, gameState.isPlaying)) 
                                 console.log("someone wins")
                         }
-                        setGameState({
-                            ...gameState,
-                            currentPiece: null,
-                            board: newPieces.map(i => createReference(i)),
-                            isPlaying: gameState.isPlaying == Color.White ? Color.Black : Color.White
-                        })
+
+                        socket.emit("chess:move", { board: newPieces, gameId: localStorage.getItem("gameId") })
+
+                        // setGameState({
+                        //     ...gameState,
+                        //     currentPiece: null,
+                        //     board: newPieces.map(i => createReference(i)),
+                        //     isPlaying: gameState.isPlaying == Color.White ? Color.Black : Color.White
+                        // })
 
 
                     } else {

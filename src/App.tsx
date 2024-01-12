@@ -1,15 +1,11 @@
-import Board from "./components/Board"
 import GameProvider from "./context/gameContext"
-import "./App.css"
-import Color from "./enums/player"
+import GamePage from "./pages/gamePage"
 
 function App() {
 
   return <>
   <GameProvider>
-    <div className="relative">
-      <Board currentPlayerColor={Color.White} /> 
-    </div>
+    <GamePage />
   </GameProvider>
   </>
 }

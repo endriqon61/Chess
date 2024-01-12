@@ -54,22 +54,8 @@ export class Piece {
         } else {
             throw new Error("Invalid piece")
         }
-        // this.calculateVision(board)
         const newLegalMoves = legalMoves.filter(move => Chess.getPieceByPosition([this.position.row + move[0], this.position.col + move[1]], board)?.getColor() != this.color).map(move => [this.position.row + move[0], this.position.col + move[1]])
         this.legalMoves = newLegalMoves  
-        // this.vision = []
-        // for(let move of newLegalMoves) {
-
-        //     // const visiblePiece = Chess.getPieceByPosition([this.position.row + move[0], this.position.col + move[1]], board)
-
-        //     const visiblePiece = Chess.getPieceByPosition([move[0], move[1]], board)
-
-        //     if(visiblePiece && visiblePiece.getColor() != this.color) {
-        //         if(visiblePiece)
-        //             this.vision.push(visiblePiece.getPosition())
-        //     }
-        // }
-       
     }
 
     public filterCheckMoves(board: Piece[]) {
@@ -78,11 +64,9 @@ export class Piece {
 
             const position = {row: move[0], col: move[1]}
             const newPieces = this.moveTo(position, board)
-            // newPieces.forEach(p => p.calculateLegalMoves(newPieces))
 
             const check = Chess.WhoInCheck(newPieces) 
 
-            console.log("Check: ", check)
 
             if(this.color == Color.White)
                 return !check?.whiteCheckedByPieces.length
@@ -161,8 +145,6 @@ export class Piece {
                 item.setPosition(ToSquare)
             }
         })
-
-
         return newPieces
     }
 
@@ -188,18 +170,4 @@ export class Piece {
     getColor(): Color {
         return this.color
     }
-    
-
 }
-
-
-// export class Pawn extends Piece {
-
-
-//     constructor(startingPos: pos, color: string) {
-//         super(startingPos, color) 
-//         if(color == "W") this.sprite = "P"
-//         else this.sprite = "p"
-//     }
-    
-// }

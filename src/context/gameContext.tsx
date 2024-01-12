@@ -4,10 +4,11 @@ import Color from "../enums/player"
 import { Chess } from "../chess/chess"
 import { Dispatch, SetStateAction } from "react"
 
-interface gameState {
+type gameState = {
     board: Piece[],
     isPlaying: Color,
-    currentPiece: Piece | null
+    currentPiece: Piece | null,
+    playerColor: Color | null
 }
 
 const startingFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
@@ -16,7 +17,8 @@ const startingPieces = Chess.parseFEN(startingFEN)
 const initialGameState = {
     board: startingPieces,
     isPlaying: Color.White,
-    currentPiece: null
+    currentPiece: null,
+    playerColor: null
 }
 
 export const GameContext = createContext<{gameState: gameState, setGameState: Dispatch<SetStateAction<gameState>>}>({gameState: initialGameState, setGameState: () => {}})

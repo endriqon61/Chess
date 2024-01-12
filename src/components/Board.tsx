@@ -7,22 +7,22 @@ import Square from './Square'
 import useGameState from '../hooks/useGameState'
 
 interface Props {
-  currentPlayerColor: Color
+  currentPlayerColor: Color,
+  pieces: Piece[]
 }
 
-const Board = ({currentPlayerColor}: Props) => {
+const Board = ({currentPlayerColor, pieces}: Props) => {
 
 
   const [tiles, setTiles] = useState<typeof defaultTiles>(defaultTiles)
-  const {gameState, setGameState} = useGameState()
-  const { board: pieces, isPlaying } = gameState
+  const { gameState } = useGameState()
 
   useEffect(() => {
     if(currentPlayerColor == Color.Black)
       setTiles({letters: defaultTiles.letters, numbers: [...defaultTiles.numbers].reverse()})
     else 
       setTiles(defaultTiles)
-  }, [isPlaying])
+  }, [])
 
   return (
     <>
@@ -31,7 +31,7 @@ const Board = ({currentPlayerColor}: Props) => {
           return <div className='grid grid-cols-8 h-full w-full'>
             {tiles.letters.map((letter: any, index2: number) => {
               const piece = pieces.find(piece => piece.getPosition().row == number && piece.getPosition().col == index2 + 1) 
-              return <span data-tile={`${letter}${number}`} className={`w-full relative text-lg text-center ${(number + index2 - 1) % 2 == 0 ? 'bg-cyan-800 text-white': 'bg-indigo-100 text-black'}  h-full inline-block`}> 
+              return <span data-cell={`${letter}${number}`} className={`w-full relative text-lg text-center ${(number + index2 - 1) % 2 == 0 ? 'bg-cyan-800 text-white': 'bg-indigo-100 text-black'}  h-full inline-block`}> 
                 <div>{letter + number}</div>
                 <Square piece={piece ? piece : null} squarePosition={{row: number, col: index2 + 1}}/>
               </span>
@@ -39,6 +39,7 @@ const Board = ({currentPlayerColor}: Props) => {
             </div>
         })}
       </div>
+    {/* } */}
     </>
   )
 
